@@ -1,0 +1,73 @@
+# Ignore build output
+bin/
+obj/
+
+# Ignore Rider project files
+.idea/
+
+# Ignore user-specific files
+*.DotSettings.user
+
+# Ignore Visual Studio solution user options
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore test result files
+TestResults/
+
+# Ignore NuGet packages
+*.nupkg
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore compiled DLLs and PDBs
+*.dll
+*.pdb
+
+# Ignore global.json if you want to keep it out of source control
+# global.json
+
+# Ignore packages folder
+packages/
+
+# Ignore ReSharper files
+_ReSharper*/
+
+# Ignore JetBrains Rider files
+*.DotSettings
+
+# Ignore coverage files
+coverage/
+
+# Ignore dotnet watch files
+.dotnetwatch/
+
+# Ignore user secrets
+secrets.json
+
+# Ignore local environment files
+.env
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Windows system files
+Thumbs.db
+
+# Ignore npm packages if any
+node_modules/
+
+# Ignore any other temporary or backup files
+*~
+*.bak
+*.swp

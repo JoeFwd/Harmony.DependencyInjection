@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harmony.DependencyInjection", "Harmony.DependencyInjection\Harmony.DependencyInjection.csproj", "{1FD0473A-FA23-41E4-9E54-489EF1BCE2ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harmony.DependencyInjection.Tests", "Harmony.DependencyInjection.Tests\Harmony.DependencyInjection.Tests.csproj", "{FDAC1102-44BB-44E4-9CD7-C0C627B66E64}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1FD0473A-FA23-41E4-9E54-489EF1BCE2ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FD0473A-FA23-41E4-9E54-489EF1BCE2ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FD0473A-FA23-41E4-9E54-489EF1BCE2ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FD0473A-FA23-41E4-9E54-489EF1BCE2ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDAC1102-44BB-44E4-9CD7-C0C627B66E64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDAC1102-44BB-44E4-9CD7-C0C627B66E64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDAC1102-44BB-44E4-9CD7-C0C627B66E64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDAC1102-44BB-44E4-9CD7-C0C627B66E64}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
