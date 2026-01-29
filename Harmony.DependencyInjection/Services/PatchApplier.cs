@@ -1,8 +1,6 @@
 using Harmony.DependencyInjection.Patches;
 using HarmonyLib;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 
 namespace Harmony.DependencyInjection.Services
 {

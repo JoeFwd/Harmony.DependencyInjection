@@ -2,19 +2,21 @@ using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Harmony.DependencyInjection.Patches;
 using Harmony.DependencyInjection.Services;
+using Microsoft.Extensions.Hosting;
 
 namespace Harmony.DependencyInjection;
 
 /// <summary>
 /// Handles the lifecycle of Harmony patches.
 /// </summary>
-public sealed class HarmonyPatcher : IDisposable
+public sealed class HarmonyPatcher : IDisposable, IHostedService
 {
     private readonly HarmonyLib.Harmony _harmony;
     private readonly ILogger<HarmonyPatcher> _logger;
     private readonly IPatchDiscovery _patchDiscovery;
     private readonly IPatchApplier _patchApplier;
     private readonly IAutoPatcher _autoPatcher;
+    private readonly Assembly _assembly;
 
     /// <summary>
     /// Creates a new patcher instance with injected dependencies.
@@ -27,15 +29,16 @@ public sealed class HarmonyPatcher : IDisposable
         ILogger<HarmonyPatcher> logger,
         IPatchDiscovery patchDiscovery,
         IPatchApplier patchApplier,
-        IAutoPatcher autoPatcher)
+        IAutoPatcher autoPatcher, IPatchAssemblyProvider patchAssemblyProvider)
     {
         _logger = logger;
         _patchDiscovery = patchDiscovery;
         _patchApplier = patchApplier;
         _autoPatcher = autoPatcher;
+        _assembly = patchAssemblyProvider.PatchAssembly;
 
         _harmony = new HarmonyLib.Harmony(
-            $"{Assembly.GetExecutingAssembly().FullName}.harmony");
+            $"{_assembly.FullName}.harmony");
     }
 
     
@@ -62,5 +65,18 @@ public sealed class HarmonyPatcher : IDisposable
     public void Dispose()
     {
         Remove();
+    }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        Apply();
+        
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        Remove();
+        return Task.CompletedTask;
     }
 }

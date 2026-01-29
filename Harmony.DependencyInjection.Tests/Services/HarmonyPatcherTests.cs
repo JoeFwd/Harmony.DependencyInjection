@@ -1,13 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using Harmony.DependencyInjection.Patches;
-using Harmony.DependencyInjection.Services;
-using Microsoft.Extensions.Logging;
-using System;
-using Moq;
-using Xunit;
-
-namespace Harmony.DependencyInjection.Tests;
+namespace Harmony.DependencyInjection.Tests.Services;
 
 public class HarmonyPatcherTests : TestBase
 {

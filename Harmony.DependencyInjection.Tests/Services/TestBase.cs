@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace Harmony.DependencyInjection.Tests;
+namespace Harmony.DependencyInjection.Tests.Services;
 
 public abstract class TestBase
 {

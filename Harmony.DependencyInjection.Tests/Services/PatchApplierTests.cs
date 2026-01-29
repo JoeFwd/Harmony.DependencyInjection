@@ -1,13 +1,14 @@
 // Unit tests for PatchApplier service
+
 using System;
-using System.Reflection;
 using System.Collections.Generic;
+using System.Reflection;
 using Harmony.DependencyInjection.Patches;
 using Harmony.DependencyInjection.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Harmony.DependencyInjection.Tests
+namespace Harmony.DependencyInjection.Tests.Services
 {
     // Target class whose method will be patched.
     public class TargetClass
