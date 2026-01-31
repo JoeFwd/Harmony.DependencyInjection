@@ -8,12 +8,12 @@ namespace Harmony.DependencyInjection.Tests.Services;
 
 public class AutoPatcherTests : TestBase
 {
-    [Fact(Skip = "Skipped for patch applier test suite")]
+    [Fact]
     public void PatchAllLoadedAssemblies_CallsHarmonyPatchAll_AndLogsInformation()
     {
         // Arrange
-        var loggerMock = GetLoggerMock<AutoPatcher>();
-        var assemblyProviderMock = new Mock<IPatchAssemblyProvider>();
+        Mock<ILogger<AutoPatcher>> loggerMock = GetLoggerMock<AutoPatcher>();
+        Mock<IPatchAssemblyProvider> assemblyProviderMock = new();
         var dummyAssembly = typeof(AutoPatcher).Assembly; // using the current assembly for simplicity
         assemblyProviderMock.Setup(p => p.PatchAssembly).Returns(dummyAssembly);
 
@@ -33,12 +33,12 @@ public class AutoPatcherTests : TestBase
             (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()), Times.Once);
     }
 
-    [Fact(Skip = "Skipped for patch applier test suite")]
+    [Fact]
     public void PatchAllLoadedAssemblies_NullHarmony_ThrowsArgumentNullException()
     {
         // Arrange
-        var loggerMock = GetLoggerMock<AutoPatcher>();
-        var assemblyProviderMock = new Mock<IPatchAssemblyProvider>();
+        Mock<ILogger<AutoPatcher>> loggerMock = GetLoggerMock<AutoPatcher>();
+        Mock<IPatchAssemblyProvider> assemblyProviderMock = new();
         assemblyProviderMock.Setup(p => p.PatchAssembly).Returns(typeof(AutoPatcher).Assembly);
         var autoPatcher = new AutoPatcher(loggerMock.Object, assemblyProviderMock.Object);
 
