@@ -2,16 +2,15 @@ using System.Threading.Tasks;
 using Harmony.DependencyInjection.Patches;
 using Harmony.DependencyInjection.Tests.Integration.Patches;
 using Harmony.DependencyInjection.Tests.Integration.Util;
-using Harmony.DependencyInjection.Tests.Services;
 using Microsoft.Extensions.Hosting;
 using Xunit;
 
 namespace Harmony.DependencyInjection.Tests.Integration;
 
-public class IntegrationTests : TestBase
+public class IntegrationTests
 {
     [Fact]
-    public async void Can_generate_compile_and_load_type()
+    public async Task Can_generate_compile_and_load_type()
     {
         // Arrange
         var source = $@"
@@ -25,7 +24,7 @@ public class IntegrationTests : TestBase
                         .ConfigureServices((context, services) =>
                         {{
                             services.AddTransient<{typeof(IPatch).FullName}, {typeof(DummyPatch).FullName}>();
-                            {typeof(HarmonyServiceCollectionExtensions).FullName}.AddHarmonyPatching(services);
+                            {typeof(HarmonyPatcherRegistration).FullName}.AddHarmonyPatching(services);
                         }})
                         .Build();
 

@@ -2,7 +2,7 @@
 
 namespace Harmony.DependencyInjection.Services;
 
-public class PatchAssemblyProvider : IPatchAssemblyProvider
+internal class PatchAssemblyProvider : IPatchAssemblyProvider
 {
-    public Assembly PatchAssembly { get => Assembly.GetCallingAssembly(); }
+    public Assembly PatchAssembly => Assembly.GetCallingAssembly();
 }

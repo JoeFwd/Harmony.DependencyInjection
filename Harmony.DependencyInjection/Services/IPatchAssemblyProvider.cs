@@ -2,7 +2,7 @@
 
 namespace Harmony.DependencyInjection.Services;
 
-public interface IPatchAssemblyProvider
+internal interface IPatchAssemblyProvider
 {
     Assembly PatchAssembly { get; }
 }

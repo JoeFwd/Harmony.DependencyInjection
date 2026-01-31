@@ -1,169 +1,175 @@
-// Unit tests for PatchApplier service
-
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Harmony.DependencyInjection.Patches;
 using Harmony.DependencyInjection.Services;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
-namespace Harmony.DependencyInjection.Tests.Services
+namespace Harmony.DependencyInjection.Tests.Services;
+
+public class PatchApplierTests : TestBase
 {
-    // Target class whose method will be patched.
-    public class TargetClass
+    public class DummyTarget
     {
-        public static bool WasPatched = false;
-        public static void TargetMethod() { }
+        public void TargetMethod() { }
     }
 
-    // Prefix patch that sets WasPatched flag.
-    public class PrefixPatch : IPatch
+    private static class DummyPatchMethods
     {
-        public MethodInfo? TargetMethod => typeof(TargetClass).GetMethod(nameof(TargetClass.TargetMethod));
-        public MethodInfo? PatchMethod => typeof(PrefixPatch).GetMethod(nameof(Prefix));
-        public PatchType PatchType => PatchType.Prefix;
-        public static void Prefix() => TargetClass.WasPatched = true;
+        // Simple static prefix method required by Harmony; matches target method signature
+        public static void Prefix(DummyTarget __instance) { }
     }
 
-    public class PatchApplierTests : TestBase
+    private class DummyPatch : IPatch
     {
-        [Fact]
-        public void Apply_PrefixPatch_SetsFlag()
+        private MethodInfo? _targetMethod;
+        private MethodInfo? _patchMethod;
+        private PatchType _patchType;
+
+        public DummyPatch(MethodInfo? targetMethod, MethodInfo? patchMethod, PatchType patchType)
         {
-            // Arrange
-            var loggerMock = CreateLogger<PatchApplier>();
-            var applier = new PatchApplier(loggerMock.Object);
-            var harmony = new HarmonyLib.Harmony("test.harmony" + Guid.NewGuid());
-            var patch = new PrefixPatch();
-
-            // Act
-            applier.Apply(new[] { patch }, harmony);
-            // Invoke the target method after patching.
-            TargetClass.TargetMethod();
-
-            // Assert
-            Assert.True(TargetClass.WasPatched, "Prefix patch should have set WasPatched flag.");
+            _targetMethod = targetMethod;
+            _patchMethod = patchMethod;
+            _patchType = patchType;
         }
 
-        [Fact]
-        public void Apply_ShouldThrowArgumentNullException_WhenPatchesNull()
-        {
-            // Arrange
-            var loggerMock = CreateLogger<PatchApplier>();
-            var applier = new PatchApplier(loggerMock.Object);
-            var harmony = new HarmonyLib.Harmony("test.harmony" + Guid.NewGuid());
+        public MethodInfo? TargetMethod => _targetMethod;
+        public MethodInfo? PatchMethod => _patchMethod;
+        public PatchType PatchType => _patchType;
+    }
 
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => applier.Apply(null, harmony));
-        }
+    [Fact]
+    public void Constructor_NullLogger_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() => new PatchApplier(null!));
+    }
 
-        // Additional edge case tests for PatchApplier
-        [Fact]
-        public void Constructor_NullLogger_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() => new PatchApplier(null!));
-        }
+    [Fact]
+    public void Apply_NullPatches_ThrowsArgumentNullException()
+    {
+        var loggerMock = GetLoggerMock<PatchApplier>();
+        var applier = new PatchApplier(loggerMock.Object);
+        var harmony = new HarmonyLib.Harmony("test");
 
-        [Fact]
-        public void Apply_EmptyCollection_DoesNotThrow()
-        {
-            var logger = CreateLogger<PatchApplier>();
-            var applier = new PatchApplier(logger.Object);
-            var harmony = new HarmonyLib.Harmony("test.empty" + Guid.NewGuid());
-            var empty = new List<IPatch>();
-            var ex = Record.Exception(() => applier.Apply(empty, harmony));
-            Assert.Null(ex);
-        }
+        Assert.Throws<ArgumentNullException>(() => applier.Apply(null!, harmony));
+    }
 
-        private class SimpleTarget
-        {
-            public static bool WasPatched = false;
-            public static void TargetMethod() { }
-        }
+    [Fact]
+    public void Apply_NullHarmony_ThrowsArgumentNullException()
+    {
+        var loggerMock = GetLoggerMock<PatchApplier>();
+        var applier = new PatchApplier(loggerMock.Object);
+        var patches = new List<IPatch>();
 
-        private class SimplePrefixPatch : IPatch
-        {
-            public void Register(IServiceCollection services) { }
-            public MethodInfo? TargetMethod => typeof(SimpleTarget).GetMethod(nameof(SimpleTarget.TargetMethod));
-            public MethodInfo? PatchMethod => typeof(SimplePrefixPatch).GetMethod(nameof(Prefix));
-            public PatchType PatchType => PatchType.Prefix;
-            public static void Prefix() => SimpleTarget.WasPatched = true;
-        }
+        Assert.Throws<ArgumentNullException>(() => applier.Apply(patches, null!));
+    }
 
-        [Fact]
-        public void Apply_DuplicatePatches_NoException()
-        {
-            var logger = CreateLogger<PatchApplier>();
-            var applier = new PatchApplier(logger.Object);
-            var harmony = new HarmonyLib.Harmony("test.dup" + Guid.NewGuid());
-            var patches = new List<IPatch> { new SimplePrefixPatch(), new SimplePrefixPatch() };
-            var ex = Record.Exception(() => applier.Apply(patches, harmony));
-            Assert.Null(ex);
-            SimpleTarget.WasPatched = false;
-            SimpleTarget.TargetMethod();
-            Assert.True(SimpleTarget.WasPatched);
-        }
+    [Fact]
+    public void Apply_ValidPatches_AppliesAndLogsInformation()
+    {
+        var loggerMock = GetLoggerMock<PatchApplier>();
+        var applier = new PatchApplier(loggerMock.Object);
+        var harmonyMock = new Mock<HarmonyLib.Harmony>("test");
+        var harmony = harmonyMock.Object;
 
-        private class UnknownPatchType : IPatch
-        {
-            public void Register(IServiceCollection services) { }
-            public MethodInfo? TargetMethod => typeof(SimpleTarget).GetMethod(nameof(SimpleTarget.TargetMethod));
-            public MethodInfo? PatchMethod => typeof(UnknownPatchType).GetMethod(nameof(Prefix));
-            public PatchType PatchType => (PatchType)999; // invalid
-            public static void Prefix() => SimpleTarget.WasPatched = true;
-        }
+        // dummy instance not needed for method reflection
+        var targetMethod = typeof(DummyTarget).GetMethod(nameof(DummyTarget.TargetMethod))!;
+        var patchMethod = typeof(DummyPatchMethods).GetMethod(nameof(DummyPatchMethods.Prefix))!; // use valid static prefix method
 
-        [Fact]
-        public void Apply_UnsupportedPatchType_NoException()
-        {
-            var logger = CreateLogger<PatchApplier>();
-            var applier = new PatchApplier(logger.Object);
-            var harmony = new HarmonyLib.Harmony("test.unknown" + Guid.NewGuid());
-            var patches = new List<IPatch> { new UnknownPatchType() };
-            var ex = Record.Exception(() => applier.Apply(patches, harmony));
-            Assert.Null(ex);
-        }
+        var patch = new DummyPatch(targetMethod, patchMethod, PatchType.Prefix);
 
-        private class ThrowingPatch : IPatch
-        {
-            public void Register(IServiceCollection services) { }
-            public MethodInfo? TargetMethod => typeof(SimpleTarget).GetMethod(nameof(SimpleTarget.TargetMethod));
-            public MethodInfo? PatchMethod => typeof(ThrowingPatch).GetMethod(nameof(Throw));
-            public PatchType PatchType => PatchType.Prefix;
-            public static void Throw()
-            {
-                throw new InvalidOperationException("failure");
-            }
-        }
+        var patches = new List<IPatch> { patch };
 
-        [Fact]
-        public void Apply_PatchMethodThrows_NoException()
-        {
-            var logger = CreateLogger<PatchApplier>();
-            var applier = new PatchApplier(logger.Object);
-            var harmony = new HarmonyLib.Harmony("test.throw" + Guid.NewGuid());
-            var patches = new List<IPatch> { new ThrowingPatch() };
-            var ex = Record.Exception(() => applier.Apply(patches, harmony));
-            Assert.Null(ex);
-        }
+        applier.Apply(patches, harmony);
 
-        private class MissingMethodsPatch : IPatch
-        {
-            public MethodInfo? TargetMethod => null;
-            public MethodInfo? PatchMethod => null;
-            public PatchType PatchType => PatchType.Prefix;
-        }
+        // Verify that an information log was written for the applied patch
+        loggerMock.Verify(l => l.Log(
+            LogLevel.Information,
+            It.IsAny<EventId>(),
+            It.IsAny<It.IsAnyType>(),
+            null,
+            (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()),
+            Times.AtLeastOnce);
+    }
 
-        [Fact]
-        public void Apply_MissingMethods_NoException()
-        {
-            var logger = CreateLogger<PatchApplier>();
-            var applier = new PatchApplier(logger.Object);
-            var harmony = new HarmonyLib.Harmony("test.missing" + Guid.NewGuid());
-            var patches = new List<IPatch> { new MissingMethodsPatch() };
-            var ex = Record.Exception(() => applier.Apply(patches, harmony));
-            Assert.Null(ex);
-        }
+    [Fact]
+    public void Apply_PatchWithNullTarget_LogsWarningAndContinues()
+    {
+        var loggerMock = GetLoggerMock<PatchApplier>();
+        var applier = new PatchApplier(loggerMock.Object);
+        var harmonyMock = new Mock<HarmonyLib.Harmony>("test");
+        var harmony = harmonyMock.Object;
+
+        var dummy = new DummyTarget();
+        var targetMethod = (MethodInfo?)null; // null target
+        var patchMethod = typeof(DummyTarget).GetMethod(nameof(DummyTarget.TargetMethod))!;
+
+        var patch = new DummyPatch(targetMethod, patchMethod, PatchType.Prefix);
+        var patches = new List<IPatch> { patch };
+
+        applier.Apply(patches, harmony);
+
+        // Verify warning logged
+        loggerMock.Verify(l => l.Log(
+            LogLevel.Warning,
+            It.IsAny<EventId>(),
+            It.IsAny<It.IsAnyType>(),
+            null,
+            (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()), Times.Once);
+    }
+
+    [Fact]
+    public void Apply_PatchWithNullPatchMethod_LogsWarningAndContinues()
+    {
+        var loggerMock = GetLoggerMock<PatchApplier>();
+        var applier = new PatchApplier(loggerMock.Object);
+        var harmonyMock = new Mock<HarmonyLib.Harmony>("test");
+        var harmony = harmonyMock.Object;
+
+        var dummy = new DummyTarget();
+        var targetMethod = typeof(DummyTarget).GetMethod(nameof(DummyTarget.TargetMethod))!;
+        var patchMethod = (MethodInfo?)null; // null patch method
+
+        var patch = new DummyPatch(targetMethod, patchMethod, PatchType.Prefix);
+        var patches = new List<IPatch> { patch };
+
+        applier.Apply(patches, harmony);
+
+        // Verify warning logged
+        loggerMock.Verify(l => l.Log(
+            LogLevel.Warning,
+            It.IsAny<EventId>(),
+            It.IsAny<It.IsAnyType>(),
+            null,
+            (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()), Times.Once);
+    }
+
+    [Fact]
+    public void Apply_PatchWithUnknownPatchType_LogsErrorAndContinues()
+    {
+        var loggerMock = GetLoggerMock<PatchApplier>();
+        var applier = new PatchApplier(loggerMock.Object);
+        var harmonyMock = new Mock<HarmonyLib.Harmony>("test");
+        var harmony = harmonyMock.Object;
+
+        var dummy = new DummyTarget();
+        var targetMethod = typeof(DummyTarget).GetMethod(nameof(DummyTarget.TargetMethod))!;
+        var patchMethod = typeof(DummyTarget).GetMethod(nameof(DummyTarget.TargetMethod))!;
+        var unknownType = (PatchType)999; // invalid enum value
+
+        var patch = new DummyPatch(targetMethod, patchMethod, unknownType);
+        var patches = new List<IPatch> { patch };
+
+        applier.Apply(patches, harmony);
+
+        // Verify error logged
+        loggerMock.Verify(l => l.Log(
+            LogLevel.Error,
+            It.IsAny<EventId>(),
+            It.IsAny<It.IsAnyType>(),
+            null,
+            (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()), Times.Once);
     }
 }

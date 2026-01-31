@@ -1,35 +1,36 @@
+using System;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 
-namespace Harmony.DependencyInjection.Services
+namespace Harmony.DependencyInjection.Services;
+
+/// <summary>
+///     Default implementation of <see cref="IAutoPatcher" />. It iterates all loaded assemblies and invokes
+///     <c>Harmony.PatchAll</c>.
+/// </summary>
+internal sealed class AutoPatcher : IAutoPatcher
 {
-    /// <summary>
-    /// Default implementation of <see cref="IAutoPatcher"/>. It iterates all loaded assemblies and invokes <c>Harmony.PatchAll</c>.
-    /// </summary>
-    public sealed class AutoPatcher : IAutoPatcher
+    private readonly ILogger<AutoPatcher> _logger;
+    private readonly Assembly _patchAssembly;
+
+    public AutoPatcher(ILogger<AutoPatcher> logger, IPatchAssemblyProvider patchAssemblyProvider)
     {
-        private readonly ILogger<AutoPatcher> _logger;
-        private readonly Assembly _patchAssembly;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _patchAssembly = patchAssemblyProvider.PatchAssembly;
+    }
 
-        public AutoPatcher(ILogger<AutoPatcher> logger, IPatchAssemblyProvider patchAssemblyProvider)
+    public void PatchAllLoadedAssemblies(HarmonyLib.Harmony harmony)
+    {
+        if (harmony == null) throw new ArgumentNullException(nameof(harmony));
+
+        try
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _patchAssembly = patchAssemblyProvider.PatchAssembly;
+            harmony.PatchAll(_patchAssembly);
+            _logger.LogInformation("Auto‑patched assembly {Assembly}.", _patchAssembly.FullName);
         }
-
-        public void PatchAllLoadedAssemblies(HarmonyLib.Harmony harmony)
+        catch (Exception ex)
         {
-            if (harmony == null) throw new ArgumentNullException(nameof(harmony));
-
-            try
-            {
-                harmony.PatchAll(_patchAssembly);
-                _logger.LogInformation("Auto‑patched assembly {Assembly}.", _patchAssembly.FullName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to auto‑patch assembly {Assembly}.", _patchAssembly.FullName);
-            }
+            _logger.LogError(ex, "Failed to auto‑patch assembly {Assembly}.", _patchAssembly.FullName);
         }
     }
 }
