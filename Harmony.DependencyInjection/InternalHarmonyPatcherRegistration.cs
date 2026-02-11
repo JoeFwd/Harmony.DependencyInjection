@@ -1,5 +1,6 @@
 ﻿using Harmony.DependencyInjection.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Harmony.DependencyInjection;
 
@@ -13,7 +14,7 @@ internal static class InternalHarmonyPatcherRegistration
         services.AddSingleton<IAutoPatcher, AutoPatcher>();
         services.AddSingleton<IPatchAssemblyProvider, PatchAssemblyProvider>();
 
-        services.AddHostedService<HarmonyPatcher>();
+        services.AddSingleton<IHostedService, HarmonyPatcher>();
 
         return services;
     }

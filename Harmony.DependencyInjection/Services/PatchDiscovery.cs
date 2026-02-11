@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Harmony.DependencyInjection.Patches;
@@ -5,16 +6,19 @@ using Microsoft.Extensions.Logging;
 
 namespace Harmony.DependencyInjection.Services;
 
+/// <inheritdoc/>
 internal sealed class PatchDiscovery : IPatchDiscovery
 {
     private readonly ILogger<PatchDiscovery> _logger;
-    private readonly IEnumerable<IPatch> _patches;
+    private readonly List<IPatch> _patches;
 
     public PatchDiscovery(
-        IEnumerable<IPatch> patches,
-        ILogger<PatchDiscovery> logger)
+                IEnumerable<IPatch> patches,
+                ILogger<PatchDiscovery> logger)
     {
-        _patches = patches;
+        if (patches == null) throw new ArgumentNullException(nameof(patches));
+        if (logger == null) throw new ArgumentNullException(nameof(logger));
+        _patches = patches.ToList();
         _logger = logger;
     }
 
@@ -27,6 +31,6 @@ internal sealed class PatchDiscovery : IPatchDiscovery
                 "Discovered patch {PatchType}.",
                 patch.GetType().FullName);
 
-        return list;
+        return list.AsReadOnly();
     }
 }

@@ -1,12 +1,9 @@
 <Project>
-  <PropertyGroup>
-    <!-- Centralized versioning for the solution -->
-    <Version>1.0.0</Version>
-    <!-- Ensure NuGet package version matches the assembly version -->
-    <PackageVersion>$(Version)</PackageVersion>
-    <!-- Optional: specify assembly version attributes -->
-    <AssemblyVersion>$(Version)</AssemblyVersion>
-    <FileVersion>$(Version)</FileVersion>
-    <InformationalVersion>$(Version)</InformationalVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Version>1.0.0</Version>
+		<PackageVersion>$(Version)</PackageVersion>
+		<AssemblyVersion>$(Version)</AssemblyVersion>
+		<FileVersion>$(Version)</FileVersion>
+		<InformationalVersion>$(Version)</InformationalVersion>
+	</PropertyGroup>
 </Project>

@@ -22,10 +22,8 @@ public class MyService : IMyService
 
 ```csharp
 using System.Reflection;
-using HarmonyLib;
 using Harmony.DependencyInjection.Patches;
 
-[HarmonyPatch(typeof(MyTargetClass))]
 public class MyPatch : IPatch
 {
     // Dependency injected by the DI container
@@ -38,10 +36,10 @@ public class MyPatch : IPatch
     }
 
     // The method that will be patched
-    public MethodInfo? TargetMethod => AccessTools.Method(typeof(MyTargetClass), "TargetMethod");
-
+    public MethodInfo? TargetMethod => typeof(MyTargetClass).GetMethod("TargetMethod", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+    
     // The method that contains the patch logic
-    public MethodInfo? PatchMethod => AccessTools.Method(typeof(MyPatch), nameof(Prefix));
+    public MethodInfo? PatchMethod => typeof(MyPatch).GetMethod(nameof(Prefix), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 
     // The type of patch (prefix, postfix, transpiler)
     public PatchType PatchType => PatchType.Prefix;

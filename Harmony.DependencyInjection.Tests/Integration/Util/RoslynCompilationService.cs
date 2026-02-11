@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -47,8 +47,8 @@ public static class RoslynCompilationService
             foreach (var path in trustedAssemblies.Split(Path.PathSeparator))
             {
                 var fileName = Path.GetFileName(path);
-                if (fileName.StartsWith("System.") || 
-                    fileName.StartsWith("mscorlib") || 
+                if (fileName.StartsWith("System.") ||
+                    fileName.StartsWith("mscorlib") ||
                     fileName.StartsWith("netstandard"))
                 {
                     referencePaths.Add(path);

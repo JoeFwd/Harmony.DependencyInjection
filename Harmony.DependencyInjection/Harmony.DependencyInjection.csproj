@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-	    <TargetFramework>netstandard2.0</TargetFramework>
-	    <Nullable>enable</Nullable>
-	    <LangVersion>latest</LangVersion>
-	    <Version>$(Version)</Version>
-	    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<Version>$(Version)</Version>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/JoeFwd/Bannerlord.ExpandedTemplate</PackageProjectUrl>
@@ -13,18 +13,18 @@
 		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Lib.Harmony" />
+		<PackageReference Include="Lib.Harmony"/>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions"/>
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"/>
 	</ItemGroup>
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
 			<_Parameter1>Harmony.DependencyInjection.Tests</_Parameter1>
 		</AssemblyAttribute>
-		<!-- required so that the Moq library can acutally create proxy object for testing purposes -->
+		<!-- required so that the Moq library can actually create proxy objects for testing purposes -->
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
 			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
 		</AssemblyAttribute>
