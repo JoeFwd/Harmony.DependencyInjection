@@ -22,7 +22,7 @@ jobs:
       - name: Get version from project
         id: get_version
         run: |
-          VERSION=$(grep -i '<Version>' Harmony.DependencyInjection/Harmony.DependencyInjection.csproj | sed -E 's/.*<Version>([^<]+)<\/Version>.*/\1/')
+          VERSION=$(grep -i '<Version>' Directory.Build.props | sed -E 's/.*<Version>([^<]+)<\/Version>.*/\1/')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create Git tag
