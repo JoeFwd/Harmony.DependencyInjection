@@ -40,6 +40,9 @@ jobs:
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
+      - name: Generate changelog
+        run: |
+          git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"* %s" > CHANGELOG.md
 
       - name: Pack NuGet package
         run: |
@@ -50,6 +53,7 @@ jobs:
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           name: Release v${{ steps.get_version.outputs.version }}
+          body_path: CHANGELOG.md
           files: ./artifacts/*.nupkg
 
       - name: Push package to NuGet
