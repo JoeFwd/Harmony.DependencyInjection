@@ -8,7 +8,7 @@ using Harmony.DependencyInjection.Tests.Integration.Patches;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Harmony.DependencyInjection.Tests.Integration.Util;
 
@@ -20,44 +20,40 @@ public static class RoslynCompilationService
 
         // 1. Define the Critical Assemblies
         // We use a HashSet to ensure we don't add the same assembly twice.
-        var referencePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> referencePaths = new(StringComparer.OrdinalIgnoreCase);
 
-        var typesToreference = new[]
+        Type[] typesToreference = new[]
         {
             typeof(object),
-            typeof(ServiceCollection),
-            typeof(Host),
-            typeof(IHostedService),
             typeof(IPatch),
-            typeof(DummyPatch)
+            typeof(IServiceCollection),
+            typeof(ServiceCollection),
+            typeof(DummyPatch),
+            typeof(HarmonyPatcherRegistration),
+            typeof(IHarmonyPatcher),
+            typeof(LoggerFactory) // Added reference for logging assembly
         };
 
         // 2. Add Critical Assemblies
         foreach (var type in typesToreference)
-        {
             if (!string.IsNullOrEmpty(type.Assembly.Location))
                 referencePaths.Add(type.Assembly.Location);
-        }
 
         // 3. Add Trusted Platform Assemblies (Runtime Core)
         // This ensures System.dll, netstandard.dll etc are found correctly on .NET Core/Standard
         var trustedAssemblies = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
         if (!string.IsNullOrEmpty(trustedAssemblies))
-        {
             foreach (var path in trustedAssemblies.Split(Path.PathSeparator))
             {
                 var fileName = Path.GetFileName(path);
                 if (fileName.StartsWith("System.") ||
                     fileName.StartsWith("mscorlib") ||
                     fileName.StartsWith("netstandard"))
-                {
                     referencePaths.Add(path);
-                }
             }
-        }
 
         // 4. Create Metadata References
-        var references = referencePaths
+        List<PortableExecutableReference> references = referencePaths
             .Select(path => MetadataReference.CreateFromFile(path))
             .ToList();
 

@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 	<PropertyGroup>
-		<MicrosoftExtensionsVersion>6.0.0</MicrosoftExtensionsVersion>
+		<MicrosoftExtensionsVersion>2.1.0</MicrosoftExtensionsVersion>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageVersion Include="Lib.Harmony" Version="2.4.2"/>
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsVersion)"/>
 		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(MicrosoftExtensionsVersion)"/>
 		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsVersion)"/>
-		<PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)"/>
 		<PackageVersion Include="xunit" Version="2.9.2"/>
 		<PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0"/>
 		<PackageVersion Include="Moq" Version="4.20.70"/>
 		<PackageVersion Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)"/>
 		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
 		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0"/>
-		<PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(MicrosoftExtensionsVersion)"/>
 	</ItemGroup>
 </Project>

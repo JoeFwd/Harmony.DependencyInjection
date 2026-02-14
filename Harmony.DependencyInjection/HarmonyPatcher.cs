@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Harmony.DependencyInjection.Patches;
 using Harmony.DependencyInjection.Services;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Harmony.DependencyInjection;
 
-internal sealed class HarmonyPatcher : IDisposable, IHostedService
+internal sealed class HarmonyPatcher : IHarmonyPatcher
 {
     private readonly IAutoPatcher _autoPatcher;
     private readonly HarmonyLib.Harmony _harmony;
@@ -18,7 +15,7 @@ internal sealed class HarmonyPatcher : IDisposable, IHostedService
     private readonly IPatchDiscovery _patchDiscovery;
 
     /// <summary>
-    /// Initializes a new instance of <see cref="HarmonyPatcher"/>.
+    ///     Initializes a new instance of <see cref="HarmonyPatcher" />.
     /// </summary>
     /// <param name="logger">Logger for diagnostic output.</param>
     /// <param name="patchDiscovery">Service that discovers patches.</param>
@@ -48,32 +45,7 @@ internal sealed class HarmonyPatcher : IDisposable, IHostedService
         _harmony = new HarmonyLib.Harmony(harmonyId);
     }
 
-    public void Dispose()
-    {
-        Remove();
-    }
-
-    /// <summary>
-    /// Starts the hosted service by applying all discovered patches.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token (not used).</param>
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        Apply();
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Stops the hosted service by removing all applied patches.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token (not used).</param>
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        Remove();
-        return Task.CompletedTask;
-    }
-
-    private void Apply()
+    public void ApplyPatches()
     {
         try
         {
@@ -85,24 +57,6 @@ internal sealed class HarmonyPatcher : IDisposable, IHostedService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to apply patches.");
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Removes all patches applied by this <see cref="HarmonyPatcher"/> instance.
-    /// </summary>
-    private void Remove()
-    {
-        try
-        {
-            _harmony.UnpatchAll();
-            _logger.LogInformation("All patches from Harmony id {HarmonyId} have been removed.", _harmony.Id);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to remove patches for Harmony id {HarmonyId}.", _harmony.Id);
-            throw;
         }
     }
 }

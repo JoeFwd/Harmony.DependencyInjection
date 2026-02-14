@@ -2,7 +2,9 @@
 
 ## Overview
 
-`Harmony.DependencyInjection` provides a lightweight way to integrate **Harmony** patches into a .NET application using the dependency‑injection pattern. It discovers classes that implement the `IPatch` interface, registers the required services, and applies the patches automatically when the host starts.
+`Harmony.DependencyInjection` provides a lightweight way to integrate **Harmony** patches into a .NET application using
+the dependency‑injection pattern. It discovers classes that implement the `IPatch` interface, registers the required
+services, and applies the patches automatically when the host starts.
 
 ## Creating a Service Class (Dependency)
 
@@ -27,7 +29,7 @@ using Harmony.DependencyInjection.Patches;
 public class MyPatch : IPatch
 {
     // Dependency injected by the DI container
-    private readonly IMyService _service;
+    private static IMyService _service;
 
     // Constructor receives the service
     public MyPatch(IMyService service)
@@ -45,7 +47,7 @@ public class MyPatch : IPatch
     public PatchType PatchType => PatchType.Prefix;
 
     // Prefix method – can use the injected service
-    public bool Prefix()
+    public static bool Prefix()
     {
         // Use the injected service before the original method runs
         _service.DoWork();
@@ -56,33 +58,42 @@ public class MyPatch : IPatch
 
 ## Registering Services, the Patch, and Initialising the Harmony Patcher
 
-When configuring the DI container, **register the dependency, the patch, and then the Harmony services**. The hosted service will apply the patch once the host is built and started.
+When configuring the DI container, **register the dependency, the patch, and then the Harmony services**. The hosted
+service will apply the patch once the host is built and started.
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Harmony.DependencyInjection;
 
-var host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((context, services) =>
-    {
-        // 1. Register the service that the patch depends on
-        services.AddSingleton<IMyService, MyService>();
+IServiceCollection serviceCollection = new ServiceCollection();
 
-        // 2. Register the patch implementation so it can be discovered (DI will inject IMyService)
-        services.AddTransient<MyPatch>();
+// 1. Register the service that the patch depends on
+serviceCollection.AddSingleton<IMyService, MyService>();
 
-        // 3. Register Harmony services and the hosted patcher
-        services.AddHarmonyPatching();
-    })
-    .Build();
+// 2. Register the patch implementation so it can be discovered (DI will inject IMyService)
+serviceCollection.AddSingleton<IPatch, MyPatch>();
 
-await host.StartAsync(); // Host (DI container) is built and started here
+// 3. Add loggers
+serviceCollection.AddLogging();
+
+// 4. Register Harmony services and the hosted patcher
+serviceCollection.AddHarmonyPatching();
+
+// Build all services
+IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+
+// Apply all Harmony  patches
+serviceProvider.GetService<IHarmonyPatcher>().ApplyPatches();
 ```
 
 ## Patch Applied Confirmation
 
-After the host has been started, the `HarmonyPatcher` hosted service runs, discovers `MyPatch`, resolves its dependencies, and applies it. You can verify the patch was applied by checking the logs (the service logs a confirmation when patches are applied) or by observing the altered behaviour of `MyTargetClass.TargetMethod` (the service's `DoWork` method will be executed before the original method).
+When the service provider is being built, the `HarmonyPatcher` discovers `MyPatch` resolves its
+dependencies. Only when `ApplyPatches` is called, is the patch applied via Harmony. You can verify the patch was applied
+by checking the logs (the service logs a confirmation
+when patches are applied) or by observing the altered behaviour of `MyTargetClass.TargetMethod` (the service's `DoWork`
+method will be executed before the original method).
 
 ## Running the Tests
 
